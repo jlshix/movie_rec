@@ -1,0 +1,39 @@
+# movie_rec
+
+毕业设计项目今天开始动手码代码
+
+注释规范参见[这里](http://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/python_style_rules/)
+
+## 17-04-08
+- 建立项目目录
+```shell
+.
+├── app     # 程序主目录
+│   ├── __init__.py
+│   ├── main    # 主蓝本
+│   │   ├── errors.py
+│   │   ├── forms.py
+│   │   ├── __init__.py
+│   │   └── views.py
+│   ├── models.py   # 数据库模型
+│   ├── static      # 静态文件
+│   ├── templates   # 模板
+│   └── utils.py    # 工具
+├── config.py       # 配置文件
+├── db_operations   # 数据库脚本
+├── README.md       # 说明
+├── requirements.txt    # 包依赖
+├── run.py          # 运行
+├── tests           # 测试
+├── venv            # 虚拟环境
+
+```
+- 使用两个蓝本：auth main
+- 加入以下拓展
+    - Flask-Bootstrap==3.3.7.1
+    - Flask-Login==0.4.0
+    - Flask-Script==2.0.5
+    - Flask-SQLAlchemy==2.2
+    - Flask-WTF==0.14.2
+- 完成基本的注册登录功能(sqlite)
+- TODO 密码散列
