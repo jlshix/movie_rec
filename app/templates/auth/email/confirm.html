@@ -4,18 +4,25 @@
     Confirm your account - Movie Rec
 {% endblock %}
 
+{% block navbar %}
+
+{% endblock %}
+
 {% block page_content %}
-<p class="text-primary">
+<pre class="text-primary">
 Dear {{ user.name }}:
 
     Welcome to Movie Rec !
 
-    Please check the following link to confirm your account in one hour:
+    Please check the following button to confirm your account in one hour:
 
+    <button class="btn-default" href="{{ url_for('auth.confirm', token=token, _external=True) }}">Click To Confirm</button>
+
+    Or you can copy following link and paste on the address bar of your browser and open:
     {{ url_for('auth.confirm', token=token, _external=True) }}
 
 
     Sincerely,
     Leo Shi
-</p>
+</pre>
 {% endblock %}

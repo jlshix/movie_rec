@@ -13,13 +13,20 @@ from app.utils import send_email
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    登录
+    :return: render
+    """
     form = LoginForm()
+    # 表单提交后的操作
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
         user = User.query.filter_by(email=email).first()
         if user.verify_password(password):
+            # 使用 flask-login 提供的方法
             login_user(user, form.remember_me.data)
+            # login_required 导致需要先登录 使用next字段继续访问
             if request.args['next']:
                 return redirect(request.args['next'])
             return redirect(url_for('main.index'))
@@ -31,14 +38,20 @@ def login():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    注册
+    :return: render
+    """
     form = RegisterForm()
     if form.validate_on_submit():
+        # 注意 User 的 __init__
         user = User(
             name=form.name.data,
             email=form.email.data,
             password=form.password.data
         )
         try:
+            # TODO 发送确认邮件成功后再提交 此处需要再考虑
             db.session.add(user)
             token = user.generate_confirmation_token()
             send_email(form.email.data, 'Confirm Your Account',
@@ -55,6 +68,10 @@ def register():
 @auth.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
+    """
+    登出
+    :return: redirect
+    """
     logout_user()
     flash('you have logged out')
     return redirect(url_for('main.index'))
@@ -63,9 +80,15 @@ def logout():
 @auth.route('/confirm/<token>')
 @login_required
 def confirm(token):
+    """
+    确认账户
+    :param token: 发送到邮箱的token
+    :return: redirect
+    """
     if current_user.confirmed:
         flash('Your account have been confirmed before')
         return redirect(url_for('main.index'))
+    # 确认操作写在数据模型里
     if current_user.confirm(token):
         flash('Thanks to confirm your account')
     else:
@@ -76,6 +99,10 @@ def confirm(token):
 @auth.route('/confirm')
 @login_required
 def reconfirm():
+    """
+    重新发送邮件确认
+    :return: redirect
+    """
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Confirm Your Account',
                'auth/email/confirm', user=current_user, token=token)
