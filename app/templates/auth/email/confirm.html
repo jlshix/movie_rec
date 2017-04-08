@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Confirm your account - Movie Rec
+{% endblock %}
+
+{% block page_content %}
+<p class="text-primary">
+Dear {{ user.name }}:
+
+    Welcome to Movie Rec !
+
+    Please check the following link to confirm your account in one hour:
+
+    {{ url_for('auth.confirm', token=token, _external=True) }}
+
+
+    Sincerely,
+    Leo Shi
+</p>
+{% endblock %}

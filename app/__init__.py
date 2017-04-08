@@ -9,8 +9,11 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_mail import Mail
+
 bs = Bootstrap()
 db = SQLAlchemy()
+mail = Mail()
 
 lm = LoginManager()
 lm.session_protection = 'strong'
@@ -28,6 +31,7 @@ def create_app(conf=None):
     bs.init_app(app)
     db.init_app(app)
     lm.init_app(app)
+    mail.init_app(app)
 
     from main import main as main_bp
     app.register_blueprint(main_bp)
