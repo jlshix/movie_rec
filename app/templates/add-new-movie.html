@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}MovieRec - Index{% endblock %}
+
+
+{% block page_content %}
+    <h1 class="h1">Add New Movie To Movie Rec</h1>
+
+    {{ wtf.quick_form(form) }}
+
+{% endblock %}

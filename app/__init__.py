@@ -10,10 +10,12 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_pymongo import PyMongo
 
 bs = Bootstrap()
 db = SQLAlchemy()
 mail = Mail()
+mg = PyMongo()
 
 lm = LoginManager()
 lm.session_protection = 'strong'
@@ -32,6 +34,7 @@ def create_app(conf=None):
     db.init_app(app)
     lm.init_app(app)
     mail.init_app(app)
+    mg.init_app(app, config_prefix='MONGO1')
 
     from main import main as main_bp
     app.register_blueprint(main_bp)

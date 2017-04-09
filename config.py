@@ -20,6 +20,9 @@ class Config(object):
         'sqlite:///' + os.path.join(base_dir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
+    # pymongo
+    MONGO1_DBNAME = 'movie'
+
     # flask-mail 相关配置
     MAIL_SERVER = 'smtp.qq.com'
     MAIL_PORT = 465
