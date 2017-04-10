@@ -27,7 +27,8 @@ def login():
             # 使用 flask-login 提供的方法
             login_user(user, form.remember_me.data)
             # login_required 导致需要先登录 使用next字段继续访问
-            if request.args['next']:
+            # 应使用 get 而不是直接访问
+            if request.args.get('next'):
                 return redirect(request.args['next'])
             return redirect(url_for('main.index'))
         else:

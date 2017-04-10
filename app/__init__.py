@@ -8,16 +8,26 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, AnonymousUserMixin
 from flask_mail import Mail
 from flask_pymongo import PyMongo
 
+
+class Anonymous(AnonymousUserMixin):
+    """
+    暂时写这里 放在 models 会让导入变乱
+    匿名用户类 增加id与nickname属性，用于判断
+    """
+    def __init__(self):
+        self.id = 0
+        self.name = 'Guest'
 bs = Bootstrap()
 db = SQLAlchemy()
 mail = Mail()
 mg = PyMongo()
 
 lm = LoginManager()
+lm.anonymous_user = Anonymous
 lm.session_protection = 'strong'
 lm.login_view = 'auth.login'
 

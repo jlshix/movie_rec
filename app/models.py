@@ -3,9 +3,8 @@
 """
 数据库模型
 """
-from . import db
+from . import db, lm
 from flask_login import UserMixin
-from . import lm
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer

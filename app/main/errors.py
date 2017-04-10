@@ -29,3 +29,16 @@ def page_not_found(e):
     return render_template('500.html'), 500
 
 
+@main.app_errorhandler(400)
+def page_not_found(e):
+    """
+    400 错误页面
+    :param e: Error
+    :return: render
+    """
+    return render_template('400.html'), 400
+
+
+
+
+

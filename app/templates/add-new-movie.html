@@ -4,8 +4,26 @@
 
 
 {% block page_content %}
-    <h1 class="h1">Add New Movie To Movie Rec</h1>
 
-    {{ wtf.quick_form(form) }}
+    <div class="page-header">
+        <h1>Add New Movie To Movie Rec</h1>
+    </div>
 
+    {{ wtf.quick_form(form, form_type="inline") }}
+{#    <form class="form">#}
+{#        <label for="id">Please input movie id</label>#}
+{#        <div class="input-group">#}
+{#            {{ form.hidden_tag() }}#}
+{#            <span class="input-group-addon" id="basic-addon">https://movie.douban.com/subject/</span>#}
+{#            {{ form.id(class='form-control') }}#}
+{#        </div>#}
+{#        <br/>#}
+{#        {{ form.submit(class='btn btn-default') }}#}
+{#    </form>#}
+    <br/>
+    <br/>
+    <br/>
+    <div>
+        <img src="{{ url_for('static', filename='add_douban_movie_sample.png') }}" class="img-rounded img-responsive">
+    </div>
 {% endblock %}

@@ -5,6 +5,8 @@
 """
 import requests
 from bs4 import BeautifulSoup
+from flask import abort
+from math import ceil
 
 
 def add_douban_movie(id):
@@ -14,7 +16,7 @@ def add_douban_movie(id):
     :return: dict
     """
     url = 'https://movie.douban.com/subject/'
-    r = requests.get(url+id)
+    r = requests.get(url + id)
     soup = BeautifulSoup(r.text, 'lxml')
 
     content = soup.find("div", id="content")
@@ -109,3 +111,154 @@ def add_douban_movie(id):
     assert len(movie) == 20, "length of movie is invalid"
 
     return movie
+
+
+def paginate(query, page, per_page, err_out):
+    """
+    MongoDB 分页 参考 SQLALCHEMY
+    :param query: 查询游标
+    :param page: 当前页
+    :param per_page: 每页数量
+    :param err_out: 查询至最后是 404 还是 空
+    :return: Pagination()
+    """
+
+    if err_out and page < 1:
+        abort(404)
+
+    items = query.skip((page - 1) * per_page).limit(per_page)
+
+    if not items and page != 1 and err_out:
+        abort(404)
+
+    if page == 1 and items.count() < per_page:
+        total = items.count()
+    else:
+        total = query.count()
+
+    return Pagination(query, page, per_page, total, items)
+
+
+class Pagination(object):
+    """
+    分页类 提供基本方法用于分页
+    """
+
+    def __init__(self, query, page, per_page, total, items):
+        """
+        构造函数
+        :param query: 查询游标
+        :param page: 当前页码
+        :param per_page: 每页长度
+        :param total: 总数
+        :param items: 内容
+        """
+        self.query = query
+        self.page = page
+        self.per_page = per_page
+        self.total = total
+        self.items = items
+
+    @property
+    def pages(self):
+        """
+        总页数
+        :return: int
+        """
+        if self.per_page == 0:
+            return 0
+        else:
+            return int(ceil(self.total / float(self.per_page)))
+
+    def prev(self, err_out=False):
+        """
+        返回上页的查询
+        :param err_out:
+        :return: Pagination
+        """
+        assert self.query is not None, 'this method needs a query object'
+        return paginate(self.query, self.page - 1, self.per_page, err_out)
+
+    @property
+    def prev_num(self):
+        """
+        返回上一页的页号
+        :return: int
+        """
+        return self.page - 1
+
+    @property
+    def has_prev(self):
+        """
+        返回是否有上一页
+        :return: bool
+        """
+        return self.page > 1
+
+    def next(self, err_out=False):
+        """
+        返回下页的查询
+        :param err_out:
+        :return: Pagination
+        """
+        assert self.query is not None, 'this method needs a query object'
+        return paginate(self.query, self.page + 1, self.per_page, err_out)
+
+    @property
+    def next_num(self):
+        """
+        返回上一页的页号
+        :return: int
+        """
+        return self.page + 1
+
+    @property
+    def has_next(self):
+        """
+        返回是否有上一页
+        :return: bool
+        """
+        return self.page < self.pages
+
+    def iter_pages(self, left_edge=2, left_current=2,
+                   right_current=2, right_edge=2):
+        """
+        用于在模板中循环调用生成底部页面导航
+        :param left_edge: 起始保留数
+        :param left_current: 左侧数
+        :param right_current: 右侧数
+        :param right_edge: 末尾保留数
+        :return: 按默认值为 "1, 2, ..., i-2, i-1, i, i+1, i+2, i+3, i+4, i+5, ..., n-1, n"
+        """
+        """Iterates over the page numbers in the pagination.  The four
+        parameters control the thresholds how many numbers should be produced
+        from the sides.  Skipped page numbers are represented as `None`.
+        This is how you could render such a pagination in the templates:
+
+        .. sourcecode:: html+jinja
+
+            {% macro render_pagination(pagination, endpoint) %}
+              <div class=pagination>
+              {%- for page in pagination.iter_pages() %}
+                {% if page %}
+                  {% if page != pagination.page %}
+                    <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+                  {% else %}
+                    <strong>{{ page }}</strong>
+                  {% endif %}
+                {% else %}
+                  <span class=ellipsis>…</span>
+                {% endif %}
+              {%- endfor %}
+              </div>
+            {% endmacro %}
+        """
+        last = 0
+        for num in xrange(1, self.pages + 1):
+            if (num <= left_edge or
+                    (self.page - left_current - 1 < num < self.page + right_current) or
+                    num > self.pages - right_edge):
+                if last + 1 != num:
+                    yield None
+                yield num
+                last = num

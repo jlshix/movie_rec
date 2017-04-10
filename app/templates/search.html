@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}MovieRec - Index{% endblock %}
+
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>Search movies you Like</h1>
+    </div>
+
+    {{ wtf.quick_form(form, form_type="inline") }}
+
+    {% if pagination %}
+        <div class="container page-header bg-success">
+            {% for movie in pagination.items %}
+                <div class="col-xs-6 col-md-3">
+                    <img src="{{ movie.poster }}" class="img-rounded" width="120px">
+                    <h5 class="text-primary">{{ movie.title }}</h5>
+                    <h5 class="text-primary">{{ movie._id }}</h5>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="pagination">
+            {% if pagination.has_prev %} {# 分页的前端展示 #}
+                <a role="button" class="btn btn-default" href="{{ url_for('.search', page=pagination.prev_num, s=form.name.data) }}"><< prev</a>
+            {% else %}
+                <a role="button" class="btn btn-default" disabled><< None</a>
+            {% endif %}
+                  {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                      {% if page != pagination.page %}
+                        <a role="button" class="btn btn-default" href="{{ url_for('.search', page=page, s=form.name.data) }}">{{ page }}</a>
+                      {% else %}
+{#                        <strong>{{ page }}</strong>#}
+                          <a role="button" class="btn btn-default" disabled>{{ page }}</a>
+                      {% endif %}
+                    {% else %}
+{#                      <span class=ellipsis>…</span>#}
+                        <a role="button" class="btn btn-default" disabled>...</a>
+                    {% endif %}
+                  {%- endfor %}
+
+            {% if pagination.has_next %}
+                <a role="button" class="btn btn-default" href="{{ url_for('.search', page=pagination.next_num, s=form.name.data) }}">next >></a>
+            {% else %}
+                <a role="button" class="btn btn-default" disabled>None >></a>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <p class="text-info">No result</p>
+    {% endif %}
+
+    <h3 class="text-info">didn't find ? <a href="{{ url_for('main.add_new_movie') }}">ADD</a> </h3>
+{% endblock %}
