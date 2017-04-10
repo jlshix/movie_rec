@@ -1,0 +1,31 @@
+{% extends 'bootstrap/base.html' %}
+{% macro popn(elems, n, attr=None) %}
+{#    输出前n个元素(的attr属性)#}
+    {% for elem in (elems | list)[:n] %}
+        {{ elem[attr] if attr else elem }} /
+    {% endfor %}
+{% endmacro %}
+
+{% macro duration(d) %}
+    {% if d %}
+        {{ d }} 分钟 /
+    {% endif %}
+{% endmacro %}
+
+{% macro star(rating) %}
+    {% set grade = ((rating.average | float)/2) | int %}
+    <span class="text-danger">
+        {% for i in range(grade) %}
+            <span class="glyphicon glyphicon-star"></span>
+        {% endfor %}
+        {% for i in range(5 - grade) %}
+            <span class="glyphicon glyphicon-star-empty"></span>
+        {% endfor %}
+    </span>
+    {{ rating.average }} ({{ rating.rating_people }}人评分)
+
+
+{% endmacro %}
+
+
+

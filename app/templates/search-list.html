@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% import 'bootstrap/wtf.html' as wtf %}
+{% import 'utils.html' as utls %}
 {% block title %}MovieRec - Index{% endblock %}
 
 
@@ -9,19 +10,34 @@
     </div>
 
     {{ wtf.quick_form(form, form_type="inline") }}
-
+    <br/>
+    <br/>
     {% if pagination %}
-        <div class="container-fluid page-header bg-success">
-            <br/>
-            <br/>
+        <div class="container jumbotron bg-success">
+
             {% for movie in pagination.items %}
-                {% if  loop.index0%4==0 %}<div class="row">{% endif %}
-                <div class="col-sm-4 col-md-3 center">
-                    <img src="{{ movie.poster }}" class="img-rounded" width="120px">
-                    <h5 class="text-primary">{{ movie.title }}</h5>
-                    <h5 class="text-primary">{{ movie._id }}</h5>
-                </div>
-                {% if  loop.index0%4==3 %}</div><br/>{% endif %}
+
+                <table class="table" width="100%">
+                    <tbody><tr>
+                        <td width="120px" valign="top">
+                            <img src="{{ movie.poster }}" class="img-rounded" width="120px">
+                        </td>
+                        <td>
+                            <div>
+                                <a style="font-size: 18pt" href="{{ url_for('main.movie_subject', id='123') }}">{{ movie.title }}</a>
+                                <br/>
+                                <p>
+                                    {% for cast in (movie.casts | list)[:2] %}
+                                        {{ cast.name }} /
+                                    {% endfor %}
+                                    {{ utls.duration(movie.duration) }}
+                                    {{ utls.popn(movie.pubdate, 1) }} {{ utls.popn(movie.directors, 1, 'name') }}
+                                </p>
+                                <p>{{ utls.star(movie.rating) }}</p>
+                            </div>
+                        </td>
+                    </tr></tbody>
+                </table>
             {% endfor %}
         </div>
 

@@ -220,8 +220,8 @@ class Pagination(object):
         """
         return self.page < self.pages
 
-    def iter_pages(self, left_edge=2, left_current=2,
-                   right_current=2, right_edge=2):
+    def iter_pages(self, left_edge=2, left_current=4,
+                   right_current=4, right_edge=2):
         """
         用于在模板中循环调用生成底部页面导航
         :param left_edge: 起始保留数
