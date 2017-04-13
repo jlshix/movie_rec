@@ -16,14 +16,7 @@ def index():
     主页 待完善
     :return: render
     """
-    form = SearchForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        movies = mg.db.spider.find({'title': {'$regex': name}})
-        # movies = mg.db.spider.find({'$or': [{'_id': id}, {'title': {'$regex': name}}]}).limit(10)
-
-        return render_template('index.html', form=form, movies=movies)
-    return render_template('index.html', form=form)
+    return redirect(url_for('.search'))
 
 
 @main.route('/user/<int:id>', methods=['GET', 'POST'])

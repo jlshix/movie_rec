@@ -3,7 +3,7 @@
 """
 数据库模型
 """
-from . import db, lm
+from . import db, lm, mg
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -91,3 +91,14 @@ def load_user(user_id):
     :return: user
     """
     return User.query.get(int(user_id))
+
+
+class Movie(object):
+    """
+    操作类
+    """
+
+    def __init__(self, query):
+        self.query = query
+        self.single = query.count() == 1
+
