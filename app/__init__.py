@@ -52,4 +52,7 @@ def create_app(conf=None):
     from auth import auth as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')     # 加前缀
 
+    from api import api as api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
+
     return app
