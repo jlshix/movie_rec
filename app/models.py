@@ -4,6 +4,9 @@
 数据库模型
 """
 from . import db, lm
+from mongoengine import (StringField, IntField, BooleanField, DateTimeField,
+                         EmbeddedDocument, EmbeddedDocumentField, ListField)
+from bson import ObjectId
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -11,19 +14,46 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 
 
-class User(UserMixin, db.Model):
+class Like(EmbeddedDocument):
+    """
+    用户喜欢的
+    类型包括 电影 影人
+    """
+    type = StringField()
+    value = StringField()
+    dt = DateTimeField(default=datetime.utcnow())
+
+
+class Comments(EmbeddedDocument):
+    title = StringField(max_length=64)
+    content = StringField()
+    dt = DateTimeField(default=datetime.utcnow())
+
+
+class Watch(EmbeddedDocument):
+    """
+    想看 在看 看过
+    """
+    type = StringField(max_length=64)
+    content = StringField(max_length=64)
+    dt = DateTimeField(default=datetime.utcnow())
+
+
+class User(UserMixin, db.Document):
     """
     用户模型 继承于数据库模型和 flask-login 的用户模型
     """
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
+    name = StringField(max_length=64, unique=True, required=True)
+    email = StringField(max_length=64, unique=True, required=True)
+    password_hash = StringField(max_length=128)
+    confirmed = BooleanField(default=False)
+    since = DateTimeField(default=datetime.utcnow())
+    gender = BooleanField(default=True)
+    interests = ListField(StringField(max_length=64))
 
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    email = db.Column(db.String(64), unique=True)
-    password_hash = db.Column(db.String(128))
-    confirmed = db.Column(db.Boolean, default=False)
+    likes = ListField(EmbeddedDocumentField(Like))
+    comments = ListField(EmbeddedDocumentField(Comments))
+    watch = ListField(EmbeddedDocumentField(Watch))
 
     @property
     def password(self):
@@ -57,7 +87,7 @@ class User(UserMixin, db.Model):
         :return: token
         """
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id})
+        return s.dumps({'confirm': str(self.id)})
 
     def confirm(self, token):
         """
@@ -70,14 +100,11 @@ class User(UserMixin, db.Model):
             data = s.loads(token)
         except:
             return False
-        if data.get('confirm') != self.id:
+        if data.get('confirm') != str(self.id):
             return False
         self.confirmed = True
-        db.session.add(self)
+        self.save()
         return True
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __repr__(self):
         return '<User %r>' % self.name
@@ -90,4 +117,5 @@ def load_user(user_id):
     :param user_id: user_id
     :return: user
     """
-    return User.query.get(int(user_id))
+    # return User.query.get(int(user_id))
+    return User.objects(id=ObjectId(user_id)).first()

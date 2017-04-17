@@ -22,7 +22,7 @@ def login():
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
-        user = User.query.filter_by(email=email).first()
+        user = User.objects(email=email).first()
         if user.verify_password(password):
             # 使用 flask-login 提供的方法
             login_user(user, form.remember_me.data)
@@ -46,19 +46,17 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         # 注意 User 的 __init__
-        user = User(
-            name=form.name.data,
-            email=form.email.data,
-            password=form.password.data
-        )
+        user = User()
+        user.name = form.name.data
+        user.email = form.email.data
+        user.password = form.password.data
         try:
             # TODO 发送确认邮件成功后再提交 此处需要再考虑
-            db.session.add(user)
             token = user.generate_confirmation_token()
             send_email(form.email.data, 'Confirm Your Account',
                        'auth/email/confirm', user=user, token=token)
             flash('Please check your mailbox to verify your account')
-            db.session.commit()
+            user.save()
             return redirect(url_for('.login'))
         except Exception, e:
             flash(e)
@@ -104,6 +102,7 @@ def reconfirm():
     重新发送邮件确认
     :return: redirect
     """
+    # TODO confirm 未完成
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Confirm Your Account',
                'auth/email/confirm', user=current_user, token=token)

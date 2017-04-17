@@ -7,7 +7,7 @@
 
 from flask import Flask
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy
+from flask_mongoengine import MongoEngine
 from flask_login import LoginManager, AnonymousUserMixin
 from flask_mail import Mail
 from flask_pymongo import PyMongo
@@ -22,7 +22,7 @@ class Anonymous(AnonymousUserMixin):
         self.id = 0
         self.name = 'Guest'
 bs = Bootstrap()
-db = SQLAlchemy()
+db = MongoEngine()
 mail = Mail()
 mg = PyMongo()
 

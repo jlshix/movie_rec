@@ -23,7 +23,19 @@
         {% endfor %}
     </span>
     {{ rating.average }} ({{ rating.rating_people }}人评分)
+{% endmacro %}
 
+{% macro name(names) %}
+{#    TODO name 名字链接 建立view#}
+    {% for name in names %}
+        {{ name.name }}  {{ '/' if loop.index != loop.length }}
+    {% endfor %}
+{% endmacro %}
+
+{% macro iter(items) %}
+    {% for item in items %}
+        {{ item }}  {{ '/' if loop.index != loop.length }}
+{% endfor %}
 
 {% endmacro %}
 

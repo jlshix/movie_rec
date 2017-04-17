@@ -24,7 +24,7 @@
                         </td>
                         <td>
                             <div>
-                                <a style="font-size: 18pt" href="{{ url_for('main.movie_subject', id='123') }}">{{ movie.title }}</a>
+                                <a style="font-size: 18pt" href="{{ url_for('main.movie_subject', id=movie._id) }}">{{ movie.title }}</a>
                                 <br/>
                                 <p>
                                     {% for cast in (movie.casts | list)[:2] %}

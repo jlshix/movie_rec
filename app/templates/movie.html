@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% import 'utils.html' as utils %}
+
+{% block title %}
+Movie - {{ movie.title }}
+{% endblock %}
+
+{% block page_content %}
+    <div class="h1">
+        <div class="col-md-6">
+            <img src="{{ movie.poster }}" width="120px">
+            <h1>{{ movie.title }} ({{ movie.year }})</h1>
+        </div>
+        {% if not current_user.is_anonymous %}
+            <div class="col-md-3">
+            <br/><br/>
+                <div class="row">
+                    <a role="button" href="#" class="btn btn-lg btn-info">想看</a>
+                    <a role="button" href="#" class="btn btn-lg btn-default">在看</a>
+                </div>
+                <br/>
+                <div class="row">
+                    <a role="button" href="#" class="btn btn-lg btn-success">看过</a>
+                    <a role="button" href="#" class="btn btn-lg btn-danger">喜欢</a>
+                </div>
+                <br/>
+
+            </div>
+        {% endif %}
+
+    </div>
+
+    <table class="table table-responsive input-lg">
+        <tr>
+            <td>rating:</td>
+            <td>{{ utils.star(movie.rating) }}</td>
+        </tr>
+        <tr>
+            <td>directors:</td>
+            <td>{{ utils.name(movie.directors) }}</td>
+        </tr>
+        <tr>
+            <td>writers:</td>
+            <td>{{ utils.name(movie.writers) }}</td>
+        </tr>
+        <tr>
+            <td>casts:</td>
+            <td>{{ utils.name(movie.casts) }}</td>
+        </tr>
+        <tr>
+            <td>countries:</td>
+            <td>{{ utils.iter(movie.countries) }}</td>
+        </tr>
+        <tr>
+            <td>pubdate:</td>
+            <td>{{ utils.iter(movie.pubdate) }}</td>
+        </tr>
+        <tr>
+            <td>genres:</td>
+            <td>{{ utils.iter(movie.genres) }}</td>
+        </tr>
+        <tr>
+            <td>languages:</td>
+            <td>{{ utils.iter(movie.languages) }}</td>
+        </tr>
+        <tr>
+            <td>duration:</td>
+            <td>{{ movie.duration }}分钟</td>
+        </tr>
+        <tr>
+            <td>summary:</td>
+            <td>{{ movie.summary }}</td>
+        </tr>
+
+    </table>
+{% endblock %}

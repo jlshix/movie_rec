@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}
+User - {{ user.name }}
+{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>{{ user.name }}</h1>
+    </div>
+
+    <table class="table table-responsive">
+        <tr>
+            <td>Email:</td>
+            <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+            <td>Confirmed:</td>
+            <td>{{ user.confirmed }}</td>
+        </tr>
+        <tr>
+            <td>Gender:</td>
+            <td>{{ '男' if user.gender else '女' }}</td>
+        </tr>
+        <tr>
+            <td>Interests:</td>
+            <td>{{ user.interests }}</td>
+        </tr>
+        <tr>
+            <td>Likes:</td>
+            <td>{{ user.likes }}</td>
+        </tr>
+        <tr>
+            <td>Comments:</td>
+            <td>{{ user.comments }}</td>
+        </tr>
+    </table>
+{% endblock %}
