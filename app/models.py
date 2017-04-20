@@ -5,47 +5,14 @@
 """
 from . import db, lm
 from mongoengine import (StringField, IntField, BooleanField, DateTimeField,
-                         EmbeddedDocument, EmbeddedDocumentField, ListField)
+                         EmbeddedDocument, EmbeddedDocumentField, ListField, ReferenceField)
 from bson import ObjectId
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
-
-
-class Like(EmbeddedDocument):
-    """
-    用户喜欢的
-    type 包括 电影 影人
-    name 为名称
-    value 为 id
-    """
-    type = StringField(max_length=64)
-    name = StringField()
-    value = StringField()
-    dt = DateTimeField(default=datetime.utcnow())
-
-
-class Comments(EmbeddedDocument):
-    """
-    评论
-    包括电影id 标题 内容
-    """
-    mid = StringField(max_length=16)
-    title = StringField(max_length=64)
-    content = StringField()
-    dt = DateTimeField(default=datetime.utcnow())
-
-
-class Watch(EmbeddedDocument):
-    """
-    想看 在看 看过
-    """
-    type = StringField(max_length=64)
-    name = StringField()
-    value = StringField(max_length=64)
-    dt = DateTimeField(default=datetime.utcnow())
+from config import LIKE_TYPE, WATCH_TYPE
 
 
 class User(UserMixin, db.Document):
@@ -59,10 +26,6 @@ class User(UserMixin, db.Document):
     since = DateTimeField(default=datetime.utcnow())
     gender = BooleanField(default=True)
     interests = ListField(StringField(max_length=64))
-
-    likes = ListField(EmbeddedDocumentField(Like))
-    comments = ListField(EmbeddedDocumentField(Comments))
-    watch = ListField(EmbeddedDocumentField(Watch))
 
     @property
     def password(self):
@@ -126,5 +89,42 @@ def load_user(user_id):
     :param user_id: user_id
     :return: user
     """
-    # return User.query.get(int(user_id))
     return User.objects(id=ObjectId(user_id)).first()
+
+
+class Like(db.Document):
+    """
+    用户喜欢的
+    type 包括 电影 影人
+    name 为名称
+    value 为 id
+    """
+    user = ReferenceField(User)
+    type = StringField(max_length=16, choices=LIKE_TYPE)
+    name = StringField()
+    value = StringField()
+    dt = DateTimeField(default=datetime.utcnow())
+
+
+class Rating(db.Document):
+    """
+    评论
+    包括电影id 标题 内容
+    """
+    user = ReferenceField(User)
+    rating = IntField(min_value=0, max_value=10)
+    mid = StringField(max_length=16)
+    title = StringField(max_length=64)
+    content = StringField()
+    dt = DateTimeField(default=datetime.utcnow())
+
+
+class Wt(db.Document):
+    """
+    想看 在看 看过
+    """
+    user = ReferenceField(User)
+    type = StringField(max_length=16, choices=WATCH_TYPE)
+    name = StringField()
+    value = StringField(max_length=64)
+    dt = DateTimeField(default=datetime.utcnow())

@@ -26,16 +26,15 @@ $(function () {
 });
 
 
-// 更改想看状态
-$(function () {
-    var a = $("#want");
-    a.click(function () {
-        if (a.text() == "想看") {
-            $.ajax('/api/subject/25934014', {
-                method: 'POST',
+function change(type, state) {
+    $.ajax('/api/movie/change', {
+                method: 'GET',
                 data: {
-                    id: document.URL.split('/')[4],
-                    uid: $('#uid').text()
+                    mid: document.URL.split('/')[4],
+                    uid: $('#uid').text(),
+                    type: type,
+                    name: $("#name").text(),
+                    state: state
                 }
             }).done(function (data) {
                 var json = $.parseJSON(data);
@@ -44,8 +43,19 @@ $(function () {
                 console.log(xhr.status);
                 console.log(status)
             });
+}
+
+
+
+// 更改想看状态
+$(function () {
+    var a = $("#want");
+    a.click(function () {
+        if (a.text() == "想看") {
+            change("want", true);
             a.text("已想看");
         } else if (a.text() == "已想看") {
+            change("want", false);
             a.text("想看");
         } else {
             alert(a.text())
@@ -53,3 +63,36 @@ $(function () {
     });
 
 });
+
+$(function () {
+    var a = $("#watching");
+    a.click(function () {
+        if (a.text() == "在看") {
+            change("watching", true);
+            a.text("已在看");
+        } else if (a.text() == "已在看") {
+            change("watching", false);
+            a.text("在看");
+        } else {
+            alert(a.text())
+        }
+    });
+
+});
+
+$(function () {
+    var a = $("#watched");
+    a.click(function () {
+        if (a.text() == "看过") {
+            change("watched", true);
+            a.text("已看过");
+        } else if (a.text() == "已看过") {
+            change("watched", false);
+            a.text("看过");
+        } else {
+            alert(a.text())
+        }
+    });
+
+});
+

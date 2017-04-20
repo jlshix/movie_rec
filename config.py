@@ -5,6 +5,8 @@
 """
 import os
 base_dir = os.path.abspath(os.path.dirname(__file__))
+WATCH_TYPE = ['want', 'watching', 'watched']
+LIKE_TYPE = ['movie', 'celebrity']
 
 
 class Config(object):

@@ -9,10 +9,10 @@
 from . import api
 from app import mg
 from flask import request
-from flask_login import current_user, login_required
-from app.models import User, Like, Watch, Comments
+from app.models import User, Like, Wt, Rating
 import json
 from bson import ObjectId
+from mongoengine.queryset.visitor import Q
 
 
 @api.route('/movie/state', methods=['GET', 'POST'])
@@ -37,7 +37,8 @@ def state():
             'like': False
         }
     }
-    for w in user.watch:
+    watch = Wt.objects(user=user)
+    for w in watch:
         if w['value'] == id:
             if w['type'] == 'want':
                 res['res']['want'] = True
@@ -45,31 +46,37 @@ def state():
                 res['res']['watching'] = True
             elif w['type'] == 'watched':
                 res['res']['watched'] = True
-    for like in user.likes:
+    likes = Like.objects(user=user)
+    for like in likes:
         if like['type'] == 'movie' and like['value'] == id:
             res['res']['like'] = True
 
     return json.dumps(res)
 
 
-@api.route('movie/want', methods=['GET', 'POST'])
+@api.route('/movie/change', methods=['GET', 'POST'])
 def change():
     uid = request.args.get('uid')
     mid = request.args.get('mid')
+    movie_type = request.args.get('type')
+    name = request.args.get('name')
     state = request.args.get('state')
+
     if uid == '0':
         return json.dumps({'status': 0, 'msg': 'user not found'})
     user = User.objects(id=ObjectId(uid)).first()
     if not user:
         return json.dumps({'status': 0, 'msg': 'user not found'})
-    if state:   # add
-        want = Watch()
-        want.type = 'want'
-        want.value = mid
-        user.watch.append(want)
-        user.save()
-    else:
-        pass
+
+    try:
+        if state == 'true':  # add
+            Wt(user=user, type=movie_type, value=mid, name=name).save()
+        else:  # del
+            Wt.objects(Q(user=user) & Q(type=movie_type) & Q(value=mid)).delete()
+    except Exception, e:
+        return json.dumps({'status': 2, 'msg': 'exception happened:' + e.message})
+
+    return json.dumps({'status': 200, 'msg': 'success'})
 
 
 
