@@ -6,28 +6,32 @@
 Movie - {{ movie.title }}
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
+{% endblock %}
+
+
 {% block page_content %}
     <div class="h1">
         <div class="col-md-6">
             <img src="{{ movie.poster }}" width="120px">
             <h1>{{ movie.title }} ({{ movie.year }})</h1>
         </div>
-        {% if not current_user.is_anonymous %}
-            <div class="col-md-3">
-            <br/><br/>
-                <div class="row">
-                    <a role="button" href="#" class="btn btn-lg btn-info">想看</a>
-                    <a role="button" href="#" class="btn btn-lg btn-default">在看</a>
-                </div>
-                <br/>
-                <div class="row">
-                    <a role="button" href="#" class="btn btn-lg btn-success">看过</a>
-                    <a role="button" href="#" class="btn btn-lg btn-danger">喜欢</a>
-                </div>
-                <br/>
-
+        <div class="col-md-3">
+        <br/><br/>
+            <div class="row">
+                <button id="want" class="btn btn-lg btn-info">想看</button>
+                <button id="watching" class="btn btn-lg btn-default">在看</button>
             </div>
-        {% endif %}
+            <br/>
+            <div class="row">
+                <button id="watched" class="btn btn-lg btn-success">看过</button>
+                <button id="like" class="btn btn-lg btn-danger">喜欢</button>
+            </div>
+            <br/>
+
+        </div>
 
     </div>
 

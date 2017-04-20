@@ -135,4 +135,3 @@ def rating():
             'contents': list((x['title'], x['rating']['average'], x['rating']['rating_people']) for x in cursor.limit(100))
         }
         return json.dumps(res)
-

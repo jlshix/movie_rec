@@ -17,14 +17,22 @@ from flask import current_app
 class Like(EmbeddedDocument):
     """
     用户喜欢的
-    类型包括 电影 影人
+    type 包括 电影 影人
+    name 为名称
+    value 为 id
     """
-    type = StringField()
+    type = StringField(max_length=64)
+    name = StringField()
     value = StringField()
     dt = DateTimeField(default=datetime.utcnow())
 
 
 class Comments(EmbeddedDocument):
+    """
+    评论
+    包括电影id 标题 内容
+    """
+    mid = StringField(max_length=16)
     title = StringField(max_length=64)
     content = StringField()
     dt = DateTimeField(default=datetime.utcnow())
@@ -35,7 +43,8 @@ class Watch(EmbeddedDocument):
     想看 在看 看过
     """
     type = StringField(max_length=64)
-    content = StringField(max_length=64)
+    name = StringField()
+    value = StringField(max_length=64)
     dt = DateTimeField(default=datetime.utcnow())
 
 

@@ -64,7 +64,7 @@
         {{ message }}
     </div>
     {% endfor %}
-
+    <a class="hidden" id="uid">{{ current_user.id }}</a>
     {% block page_content %}{% endblock %}
 </div>
 {% endblock %}

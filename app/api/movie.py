@@ -1,0 +1,77 @@
+# coding: utf-8
+# Created by leo on 17-4-19.
+"""
+用于电影相关的操作
+验证 想看 在看 看过 喜欢
+添加
+"""
+
+from . import api
+from app import mg
+from flask import request
+from flask_login import current_user, login_required
+from app.models import User, Like, Watch, Comments
+import json
+from bson import ObjectId
+
+
+@api.route('/movie/state', methods=['GET', 'POST'])
+def state():
+    """
+    使用参数中的 id 和 uid 判断用户是否喜欢这部电影
+    :return: json
+    """
+    id = request.args.get('id')
+    uid = request.args.get('uid')
+    if uid == '0':
+        return json.dumps({'status': 0, 'msg': 'user not found'})
+    user = User.objects(id=ObjectId(uid)).first()
+    if not user:
+        return json.dumps({'status': 0, 'msg': 'user not found'})
+    res = {
+        'status': 200,
+        'res': {
+            'want': False,
+            'watching': False,
+            'watched': False,
+            'like': False
+        }
+    }
+    for w in user.watch:
+        if w['value'] == id:
+            if w['type'] == 'want':
+                res['res']['want'] = True
+            elif w['type'] == 'watching':
+                res['res']['watching'] = True
+            elif w['type'] == 'watched':
+                res['res']['watched'] = True
+    for like in user.likes:
+        if like['type'] == 'movie' and like['value'] == id:
+            res['res']['like'] = True
+
+    return json.dumps(res)
+
+
+@api.route('movie/want', methods=['GET', 'POST'])
+def change():
+    uid = request.args.get('uid')
+    mid = request.args.get('mid')
+    state = request.args.get('state')
+    if uid == '0':
+        return json.dumps({'status': 0, 'msg': 'user not found'})
+    user = User.objects(id=ObjectId(uid)).first()
+    if not user:
+        return json.dumps({'status': 0, 'msg': 'user not found'})
+    if state:   # add
+        want = Watch()
+        want.type = 'want'
+        want.value = mid
+        user.watch.append(want)
+        user.save()
+    else:
+        pass
+
+
+
+
+

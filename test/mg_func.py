@@ -1,7 +1,6 @@
 # coding: utf-8
 # Created by leo on 17-4-12.
 
-from app.models import Movie
 from app import mg
 
 col = mg.db.spider
