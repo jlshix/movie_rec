@@ -45,6 +45,27 @@ function change(type, state) {
             });
 }
 
+function change_like(type, state) {
+    $.ajax('/api/movie/like/change', {
+                method: 'GET',
+                data: {
+                    mid: document.URL.split('/')[4],
+                    uid: $('#uid').text(),
+                    type: type,
+                    name: $("#name").text(),
+                    state: state
+                }
+            }).done(function (data) {
+                var json = $.parseJSON(data);
+                console.log(json.title);
+            }).fail(function (xhr, status) {
+                console.log(xhr.status);
+                console.log(status)
+            });
+}
+
+
+
 
 
 // 更改想看状态
@@ -95,4 +116,24 @@ $(function () {
     });
 
 });
+
+
+$(function () {
+    var a = $("#like");
+    a.click(function () {
+        if (a.text() == "喜欢") {
+            change_like("movie", true);
+            a.text("已喜欢");
+        } else if (a.text() == "已喜欢") {
+            change_like("movie", false);
+            a.text("喜欢");
+        } else {
+            alert(a.text())
+        }
+    });
+
+});
+
+
+
 

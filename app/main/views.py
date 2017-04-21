@@ -8,7 +8,7 @@ from flask import render_template, flash, request, session, redirect, url_for
 from forms import SearchForm, AddNewMovieForm
 from app import mg
 from utils import add_douban_movie, paginate
-from app.models import User
+from app.models import User, Wt, Like, Rating
 from flask_login import login_required
 
 
@@ -30,7 +30,9 @@ def user(id):
     :return:
     """
     user = User.objects(id=id).first()
-    return render_template('user.html', user=user)
+    wts = Wt.objects(user=user).order_by('type')
+    likes = Like.objects(user=user)
+    return render_template('user.html', user=user, wts=wts, likes=likes)
 
 
 @main.route('/search/', methods=['GET', 'POST'])

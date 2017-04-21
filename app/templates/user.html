@@ -28,11 +28,23 @@ User - {{ user.name }}
         </tr>
         <tr>
             <td>Likes:</td>
-            <td>{{ user.likes }}</td>
+            <td>
+                {% for like in likes %}
+                    <span class="text-primary">{{ like.type }}</span> {{ like.name }} @ {{ like.dt }}<br/>
+                {% endfor %}
+            </td>
         </tr>
         <tr>
-            <td>Comments:</td>
-            <td>{{ user.comments }}</td>
+            <td>Ratings:</td>
+            <td>{{ ratings }}</td>
+        </tr>
+        <tr>
+            <td>Watch:</td>
+            <td>
+                {% for wt in wts %}
+                    <span class="text-primary">{{ wt.type }}</span> {{ wt.name }} @ {{ wt.dt }}<br/>
+                {% endfor %}
+            </td>
         </tr>
     </table>
 {% endblock %}
