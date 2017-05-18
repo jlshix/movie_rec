@@ -11,6 +11,7 @@ from flask_mongoengine import MongoEngine
 from flask_login import LoginManager, AnonymousUserMixin
 from flask_mail import Mail
 from flask_pymongo import PyMongo
+from pyspark import SparkConf, SparkContext
 
 
 class Anonymous(AnonymousUserMixin):
@@ -30,6 +31,9 @@ lm = LoginManager()
 lm.anonymous_user = Anonymous
 lm.session_protection = 'strong'
 lm.login_view = 'auth.login'
+
+spark_conf = SparkConf().setAppName('movie_rec').setMaster('local[*]')
+sc = SparkContext(conf=spark_conf)
 
 
 def create_app(conf=None):

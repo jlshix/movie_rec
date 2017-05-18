@@ -50,6 +50,37 @@ def to_mongo(old, new, res):
         doc = old.find_one({'_id': id})
         new.insert_one(doc)
 
+
+def to_movie(sc, size, movie_ids):
+    """得到筛选后的 电影数据集
+    """
+    dic = {
+        'small': 'ml-latest-small',
+        'full': 'ml-latest'
+    }
+    sc.textFile('./{}/movies.csv'.format(dic[size])) \
+        .flatMap(lambda x: x.split('\n')) \
+        .map(lambda x: x.split(',')) \
+        .filter(lambda x: x[0] in movie_ids)\
+        .map(lambda x: u'{},{},{}'.format(x[0], x[1], x[2]))\
+        .saveAsTextFile('movies')
+
+
+def to_rating(sc, size, movie_ids):
+    """得到筛选后的 评分数据集
+    """
+    dic = {
+        'small': 'ml-latest-small',
+        'full': 'ml-latest'
+    }
+    sc.textFile('./{}/ratings.csv'.format(dic[size])) \
+        .flatMap(lambda x: x.split('\n')) \
+        .map(lambda x: x.split(',')) \
+        .filter(lambda x: x[1] in movie_ids) \
+        .map(lambda x: u'{},{},{},{}'.format(x[0], x[1], x[2], x[3])) \
+        .saveAsTextFile('ratings')
+
+
 if __name__ == '__main__':
     client = MongoClient('localhost', 27017)
     col = client['movie']['spider']
@@ -65,4 +96,8 @@ if __name__ == '__main__':
     print res.count()
 
     to_mongo(col, new, res)
+
+    movie_ids = res.map(lambda x: x[1][0])
+    to_movie(sc, 'full', list(movie_ids.toLocalIterator()))
+    to_rating(sc, 'full', list(movie_ids.toLocalIterator()))
 
