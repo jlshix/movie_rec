@@ -8,7 +8,7 @@ from app import mail
 from flask_mail import Message
 from flask import render_template
 from threading import Thread
-from run import app
+from flask import current_app
 
 
 def send_async_email(msg):
@@ -17,7 +17,7 @@ def send_async_email(msg):
     :param msg: 邮件内容
     :return: None
     """
-    with app.app_context():
+    with current_app.app_context():
         mail.send(msg)
 
 

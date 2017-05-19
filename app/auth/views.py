@@ -23,6 +23,9 @@ def login():
         email = form.email.data
         password = form.password.data
         user = User.objects(email=email).first()
+        if not user:
+            flash('user not found in database')
+            return redirect(url_for('auth.login'))
         if user.verify_password(password):
             # 使用 flask-login 提供的方法
             login_user(user, form.remember_me.data)
