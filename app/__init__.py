@@ -11,7 +11,7 @@ from flask_mongoengine import MongoEngine
 from flask_login import LoginManager, AnonymousUserMixin
 from flask_mail import Mail
 from flask_pymongo import PyMongo
-from pyspark import SparkConf, SparkContext
+from als_rec import Recommender
 
 
 class Anonymous(AnonymousUserMixin):
@@ -22,18 +22,17 @@ class Anonymous(AnonymousUserMixin):
     def __init__(self):
         self.id = 0
         self.name = 'Guest'
+
 bs = Bootstrap()
 db = MongoEngine()
 mail = Mail()
 mg = PyMongo()
+recommender = Recommender()
 
 lm = LoginManager()
 lm.anonymous_user = Anonymous
 lm.session_protection = 'strong'
 lm.login_view = 'auth.login'
-
-spark_conf = SparkConf().setAppName('movie_rec').setMaster('local[*]')
-sc = SparkContext(conf=spark_conf)
 
 
 def create_app(conf=None):
@@ -49,6 +48,7 @@ def create_app(conf=None):
     lm.init_app(app)
     mail.init_app(app)
     mg.init_app(app, config_prefix='MONGO1')
+    recommender.init_app(app)
 
     from main import main as main_bp
     app.register_blueprint(main_bp)

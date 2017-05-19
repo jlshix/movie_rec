@@ -1,13 +1,13 @@
 # coding: utf-8
 # Created by leo on 17-5-15.
 """
-推荐 API
+针对单部电影的推荐 API
 """
 import json
 from operator import add
 from utils import res_return, RES_FILTER, LIMIT
 from . import api
-from app import mg, sc
+from app import mg, recommender
 
 
 @api.route('/rec/tags/<id>', methods=['GET', 'POST'])
@@ -17,8 +17,8 @@ def rec_by_tags(id):
     :param id: movieId
     :return: json
     """
-    item = mg.db.spider.find_one({'_id': id})
-    cursor = mg.db.spider.find({
+    item = mg.db.movie.find_one({'_id': id})
+    cursor = mg.db.movie.find({
         'genres': item['genres']
     }, RES_FILTER).limit(LIMIT)
     return res_return(cursor)
@@ -31,8 +31,8 @@ def rec_by_directors(id):
     :param id: movieId
     :return: json
     """
-    item = mg.db.spider.find_one({'_id': id})
-    cursor = mg.db.spider.find({
+    item = mg.db.movie.find_one({'_id': id})
+    cursor = mg.db.movie.find({
         'directors': item['directors']
     }, RES_FILTER).limit(LIMIT)
     return res_return(cursor)
@@ -45,8 +45,8 @@ def rec_by_writers(id):
     :param id: movieId
     :return: json
     """
-    item = mg.db.spider.find_one({'_id': id})
-    cursor = mg.db.spider.find({
+    item = mg.db.movie.find_one({'_id': id})
+    cursor = mg.db.movie.find({
         'writers': item['writers']
     }, RES_FILTER).limit(LIMIT)
     return res_return(cursor)
@@ -59,10 +59,10 @@ def rec_by_casts(id):
     :param id: movieId
     :return: json
     """
-    item = mg.db.spider.find_one({'_id': id})
+    item = mg.db.movie.find_one({'_id': id})
     contents = []
     for i in xrange(2):
-        cursor = mg.db.spider.find({'casts': {
+        cursor = mg.db.movie.find({'casts': {
             '$elemMatch': {
                 'id': item['casts'][i]['id']
             }
@@ -81,20 +81,20 @@ def rec_by_casts(id):
 
 @api.route('/rec/sum/<id>')
 def rec_sum(id):
-    item = mg.db.spider.find_one({'_id': id})
-    genres_cursor = mg.db.spider.find({
+    item = mg.db.movie.find_one({'_id': id})
+    genres_cursor = mg.db.movie.find({
         'genres': item['genres']
     }, RES_FILTER).limit(LIMIT)
-    directors_cursor = mg.db.spider.find({
+    directors_cursor = mg.db.movie.find({
         'directors': item['directors']
     }, RES_FILTER).limit(LIMIT)
-    writers_cursor = mg.db.spider.find({
+    writers_cursor = mg.db.movie.find({
         'writers': item['writers']
     }, RES_FILTER).limit(LIMIT)
 
     contents = []
     for i in xrange(2):
-        cursor = mg.db.spider.find({'casts': {
+        cursor = mg.db.movie.find({'casts': {
             '$elemMatch': {
                 'id': item['casts'][i]['id']
             }
@@ -105,7 +105,7 @@ def rec_sum(id):
     contents.extend(list(directors_cursor))
     contents.extend(list(writers_cursor))
 
-    rdd = sc.parallelize([x['_id'] for x in contents])
+    rdd = recommender.sc.parallelize([x['_id'] for x in contents])
     tmp = rdd.map(lambda x: (x, 1))\
         .reduceByKey(add)\
         .sortBy(lambda x: x[1], False)\

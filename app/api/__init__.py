@@ -7,4 +7,4 @@ from flask import Blueprint
 
 api = Blueprint('api', __name__)
 
-import search, movie, recommand
+import search, movie, single_rec, cf_rec

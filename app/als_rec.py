@@ -1,32 +1,38 @@
 # coding: utf-8
 # Created by leo on 17-5-18.
 
-import os
+from pyspark import SparkContext, SparkConf
 from pyspark.mllib.recommendation import ALS
-
+from pymongo import MongoClient
 import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-def calc_count_and_avg(id_rating):
-    count = len(id_rating)
-
-
 class Recommender(object):
 
-    def __init__(self, sc, path_to_file):
+    def __init__(self, app=None):
+        self.rank = 8
+        self.seed = 5L
+        self.iterations = 10
+        self.regularization_parameter = 0.1
+
+    def init_app(self, app):
 
         """
         初始化函数 读入电影和评分,生成 RDD
-        :param sc: SparkContext
-        :param path_to_file: 文件路径
+        :param app: app
         """
         log.info('Initializing recommender...')
-        self.sc = sc
+        client = MongoClient('localhost', 27017)
+        self.col = client['mr']['movie']
+        conf = SparkConf().setAppName('movie_rec').setMaster('local[*]')
+        self.sc = SparkContext(conf=conf)
 
-        log.info('loading movie data...')
-        ratings_raw = sc.textFile(path_to_file + 'ratings/*')
+        log.info('loading ratings data...')
+        # ratings_raw = sc.textFile(path_to_file + 'ratings/*')
+        ratings_raw = self.sc.textFile('ratings.csv')
+        log.info(ratings_raw.take(6))
         # take 返回一个列表 用[0]还是取第一个
         ratings_raw_header = ratings_raw.take(1)[0]
         # ratings 结构为 (userId, movieId, rating, timestamp)
@@ -36,7 +42,8 @@ class Recommender(object):
             .map(lambda items: (int(items[0]), int(items[1]), float(items[2]))).cache()
         log.info('ratings data done...')
 
-        movies_raw = sc.textFile(path_to_file + 'movies/*')
+        # movies_raw = sc.textFile(path_to_file + 'movies/*')
+        movies_raw = self.sc.textFile('movies.csv')
         movies_raw_header = movies_raw.take(1)[0]
         # movies 结构为 (movieId, title, genres)
         self.movies_rdd = movies_raw.filter(lambda line: line != movies_raw_header) \
@@ -46,11 +53,7 @@ class Recommender(object):
         self.titles_rdd = self.movies_rdd.map(lambda item: (int(item[0]), item[1])).cache()
 
         log.info('movies data done.')
-
-        self.rank = 8
-        self.seed = 5L
-        self.iterations = 10
-        self.regularization_parameter = 0.1
+        self.__rating_count_and_avg()
         self.__train_model()
 
     def __rating_count_and_avg(self):
@@ -63,9 +66,10 @@ class Recommender(object):
         # 返回 (id, count, avg)
         self.id_count_avg_rdd = self.ratings_rdd.map(lambda x: (x[1], x[2])).groupByKey()\
             .map(lambda item: (
-                item[0], len(item[1]), float(sum(x for x in item[1]) / len(item[0]))
+                item[0], len(item[1]), float(sum(x for x in item[1]) / len(item[1]))
         ))
         self.id_count_rdd = self.id_count_avg_rdd.map(lambda x: (x[0], x[1]))
+        log.info('done rating count and average rating.')
 
     def __train_model(self):
         log.info('training model...')
@@ -84,6 +88,8 @@ class Recommender(object):
         :param user_movie_rdd:
         :return: (title, rating, count)
         """
+        # (mid, rating).(mid, title) -> (mid, (rating, title))
+        # (mid, (rating, title)).(mid, count) -> (mid, ((rating, title), count))
         predicted_movie_rating = self.model.predictAll(user_movie_rdd)\
             .map(lambda x: (x.product, x.rating))
         title_rating_count = predicted_movie_rating.join(self.titles_rdd)\
@@ -111,6 +117,21 @@ class Recommender(object):
         uid_movie_rdd = self.sc.parallelize(movie_ids).map(lambda x: (uid, x))
         return self.__predict(uid_movie_rdd)
 
+    def top_n(self, uid, n):
+        """
+        为用户推荐 n 部电影
+        :param uid: userId
+        :param n: number of movies
+        :return: predict
+        """
+        log.info('doing top_n...')
+        uid_movie_rdd = self.ratings_rdd.filter(lambda x: x[0] != uid)\
+            .map(lambda x: (uid, x[1])).distinct()
+
+        top_n = self.__predict(uid_movie_rdd)\
+            .filter(lambda r: r[2] >= 25).takeOrdered(n, key=lambda x: -x[1])
+        log.info('done top_n...')
+        return top_n
 
 
 
