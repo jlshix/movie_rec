@@ -5,7 +5,7 @@
 """
 from . import db, lm
 from mongoengine import (StringField, IntField, BooleanField, DateTimeField,
-                         EmbeddedDocument, EmbeddedDocumentField, ListField, ReferenceField)
+                         SequenceField, ListField, ReferenceField)
 from bson import ObjectId
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,6 +19,7 @@ class User(UserMixin, db.Document):
     """
     用户模型 继承于数据库模型和 flask-login 的用户模型
     """
+    uid = SequenceField()
     name = StringField(max_length=64, unique=True, required=True)
     email = StringField(max_length=64, unique=True, required=True)
     password_hash = StringField(max_length=128)
