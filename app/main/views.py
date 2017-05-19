@@ -47,7 +47,7 @@ def search():
     else:
         name = request.args['s']
         page = request.args['page']
-        movies = mg.db.spider.find({'title': {'$regex': name}})
+        movies = mg.db.movie.find({'title': {'$regex': name}})
         pagination = paginate(movies, int(page), 12, False)
         form.name.data = name
         return render_template('search-list.html', form=form, pagination=pagination)
@@ -63,7 +63,7 @@ def add_new_movie():
             return render_template('add-new-movie.html', form=form)
         movie = add_douban_movie(id)
         if movie:
-            insert_id = mg.db.spider.insert_one(movie)
+            insert_id = mg.db.movie.insert_one(movie)
             if insert_id:
                 flash(movie['title']+' added, thanks for your contribution!')
                 return render_template('add-new-movie.html', form=form)
@@ -75,5 +75,5 @@ def add_new_movie():
 
 @main.route('/subject/<id>')
 def movie_subject(id):
-    movie = mg.db.spider.find({'_id': id}).limit(1)
+    movie = mg.db.movie.find({'_id': id}).limit(1)
     return render_template('movie.html', movie=movie[0])

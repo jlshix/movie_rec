@@ -13,7 +13,7 @@ import re
 
 @api.route('/subject/<id>', methods=['GET', 'POST'])
 def subject(id):
-    cursor = mg.db.spider.find({'_id': id})
+    cursor = mg.db.movie.find({'_id': id})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     elif cursor.count() == 1:
@@ -24,7 +24,7 @@ def subject(id):
 
 @api.route('/genres/<tag>', methods=['GET', 'POST'])
 def genres(tag):
-    cursor = mg.db.spider.find({'genres': {'$in': [tag]}})
+    cursor = mg.db.movie.find({'genres': {'$in': [tag]}})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     else:
@@ -38,7 +38,7 @@ def genres(tag):
 
 @api.route('/year/<tag>', methods=['GET', 'POST'])
 def year(tag):
-    cursor = mg.db.spider.find({'year': tag})
+    cursor = mg.db.movie.find({'year': tag})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     else:
@@ -52,7 +52,7 @@ def year(tag):
 
 @api.route('/country/<tag>', methods=['GET', 'POST'])
 def country(tag):
-    cursor = mg.db.spider.find({'countries': {'$in': [tag]}})
+    cursor = mg.db.movie.find({'countries': {'$in': [tag]}})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     else:
@@ -68,7 +68,7 @@ def country(tag):
 def director(tag):
     tag = str(tag).replace('', '·')
     pat = re.compile(tag)
-    cursor = mg.db.spider.find({'directors.name': {'$in': [pat]}})
+    cursor = mg.db.movie.find({'directors.name': {'$in': [pat]}})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     else:
@@ -84,7 +84,7 @@ def director(tag):
 def actor(tag):
     tag = unicode(tag).replace(' ', u'·')
     pat = re.compile(tag)
-    cursor = mg.db.spider.find({'casts.name': {'$in': [pat]}})
+    cursor = mg.db.movie.find({'casts.name': {'$in': [pat]}})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     else:
@@ -100,7 +100,7 @@ def actor(tag):
 def writer(tag):
     tag = unicode(tag).replace(' ', u'·')
     pat = re.compile(tag)
-    cursor = mg.db.spider.find({'writers.name': {'$in': [pat]}})
+    cursor = mg.db.movie.find({'writers.name': {'$in': [pat]}})
     if cursor.count() == 0:
         return json.dumps({'status': 404})
     else:
@@ -124,7 +124,7 @@ def rating():
     if len(query) == 0:
         return json.dumps({'status': 1, 'msg': 'param problems'})
     else:
-        cursor = mg.db.spider.find(query)
+        cursor = mg.db.movie.find(query)
 
     if cursor.count() == 0:
         return json.dumps({'status': 404})

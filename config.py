@@ -19,11 +19,11 @@ class Config(object):
 
     # mongoengine
     MONGODB_SETTINGS = {
-        'db': 'movie'
+        'db': 'mr'
     }
 
     # pymongo
-    MONGO1_DBNAME = 'movie'
+    MONGO1_DBNAME = 'mr'
 
     # flask-mail 相关配置
     MAIL_SERVER = 'smtp.qq.com'

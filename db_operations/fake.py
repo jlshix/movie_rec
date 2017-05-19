@@ -10,14 +10,14 @@ from datetime import datetime
 
 
 mg = MongoClient('localhost', 27017)
-db = mg.movie
+db = mg['mr']
 fake = Faker()
 
 
 def get_likes(num):
     res = []
-    count = db.spider.count()
-    query = db.spider.find({}, {'_id': 1, 'title': 1}).skip(count/randint(1, 10)).limit(num)
+    count = db.movie.count()
+    query = db.movie.find({}, {'_id': 1, 'title': 1}).skip(count/randint(1, 10)).limit(num)
     for i in xrange(num):
         like = Like()
         like.type = 'movie'
@@ -29,8 +29,8 @@ def get_likes(num):
 
 def get_watch(num):
     res = []
-    count = db.spider.count()
-    query = db.spider.find({}, {'_id': 1, 'title': 1}).skip(count / randint(1, 10)).limit(num)
+    count = db.movie.count()
+    query = db.movie.find({}, {'_id': 1, 'title': 1}).skip(count / randint(1, 10)).limit(num)
     for i in xrange(num):
         watch = Watch()
         no = randint(0, 2)
@@ -43,8 +43,8 @@ def get_watch(num):
 
 def get_comments(num):
     res = []
-    count = db.spider.count()
-    query = db.spider.find({}, {'_id': 1}).skip(count / randint(1, 10)).limit(num)
+    count = db.movie.count()
+    query = db.movie.find({}, {'_id': 1}).skip(count / randint(1, 10)).limit(num)
     for i in xrange(num):
         comment = Comments()
         comment.mid = query[i]['_id']
