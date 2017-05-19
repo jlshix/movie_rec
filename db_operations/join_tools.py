@@ -45,9 +45,11 @@ def to_mongo(old, new, res):
     :param new: new collection
     :param res: join res from spark
     """
-    ids = res.map(lambda x: x[1][1]).toLocalIterator()
-    for id in ids:
-        doc = old.find_one({'_id': id})
+    # (imdb, (id, douban)) -> (id, douban)
+    ids = res.map(lambda x: x[1]).toLocalIterator()
+    for lens_id, douban in ids:
+        doc = old.find_one({'_id': douban})
+        doc['lens_id'] = lens_id
         new.insert_one(doc)
 
 
@@ -92,12 +94,13 @@ if __name__ == '__main__':
     print imdb_id.count(), imdb_id.take(5)
     imdb_douban = get_imdb_douban(col, sc)
     print imdb_douban.count(), imdb_douban.take(5)
+    # (imdb, id).(imdb, douban) -> (imdb, (id, douban))
     res = imdb_id.join(imdb_douban)
     print res.count()
 
     to_mongo(col, new, res)
 
-    movie_ids = res.map(lambda x: x[1][0])
-    to_movie(sc, 'full', list(movie_ids.toLocalIterator()))
-    to_rating(sc, 'full', list(movie_ids.toLocalIterator()))
+    # movie_ids = res.map(lambda x: x[1][0])
+    # to_movie(sc, 'full', list(movie_ids.toLocalIterator()))
+    # to_rating(sc, 'full', list(movie_ids.toLocalIterator()))
 
