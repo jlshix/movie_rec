@@ -3,8 +3,9 @@
 
 from pyspark import SparkContext, SparkConf
 from pyspark.mllib.recommendation import ALS
-from pymongo import MongoClient
 import logging
+from pymongo import MongoClient
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -17,18 +18,29 @@ class Recommender(object):
         self.iterations = 10
         self.regularization_parameter = 0.1
 
-    def init_app(self, app):
+    def init_app(self, mg):
 
         """
         初始化函数 读入电影和评分,生成 RDD
-        :param app: app
+        :param mg: mongodb
         """
+        # 初始化 mongodb 和 spark
         log.info('Initializing recommender...')
         client = MongoClient('localhost', 27017)
-        self.col = client['mr']['movie']
+        self.col = client['mr']['rating']
         conf = SparkConf().setAppName('movie_rec').setMaster('local[*]')
         self.sc = SparkContext(conf=conf)
 
+        # 查询数据库中的评分数据
+        log.info('Querying mongodb data...')
+        query = self.col.find(
+            {},
+            {'_id': 0, 'uid': 1, 'mid': 1, 'rating': 1}
+        )
+        qlist = [(x['uid'], x['mid'], x['rating']) for x in query]
+        self.mg_ratings_rdd = self.sc.parallelize(qlist)
+
+        # 载入 movielens 数据
         log.info('loading ratings data...')
         # ratings_raw = sc.textFile(path_to_file + 'ratings/*')
         ratings_raw = self.sc.textFile('ratings.csv')
@@ -36,10 +48,11 @@ class Recommender(object):
         # take 返回一个列表 用[0]还是取第一个
         ratings_raw_header = ratings_raw.take(1)[0]
         # ratings 结构为 (userId, movieId, rating, timestamp)
-        # 去掉文件头 -> 每行以逗号分割变为一个列表 -> 转为相应的数据类型
+        # 去掉文件头 -> 每行以逗号分割变为一个列表 -> 转为相应的数据类型 -> 合并数据库数据
         self.ratings_rdd = ratings_raw.filter(lambda line: line != ratings_raw_header) \
             .map(lambda line: line.split(',')) \
-            .map(lambda items: (int(items[0]), int(items[1]), float(items[2]))).cache()
+            .map(lambda items: (int(items[0]), int(items[1]), float(items[2])))\
+            .union(self.mg_ratings_rdd).cache()
         log.info('ratings data done...')
 
         # movies_raw = sc.textFile(path_to_file + 'movies/*')
@@ -101,7 +114,6 @@ class Recommender(object):
         增加新的评分数据
         :param ratings:
         """
-        # TODO 存入数据库 定期重新计算模型
         new_rdd = self.sc.parallelize(ratings)
         self.ratings_rdd = self.ratings_rdd.union(new_rdd)
         self.__rating_count_and_avg()
@@ -132,9 +144,3 @@ class Recommender(object):
             .filter(lambda r: r[2] >= 25).takeOrdered(n, key=lambda x: -x[1])
         log.info('done top_n...')
         return top_n
-
-
-
-
-
-

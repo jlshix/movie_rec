@@ -6,7 +6,7 @@ main 蓝本的视图
 from . import main
 from flask import render_template, flash, request, session, redirect, url_for
 from forms import SearchForm, AddNewMovieForm, RatingForm
-from app import mg, db
+from app import mg, db, recommender
 from utils import add_douban_movie, paginate
 from app.models import User, Wt, Like, Rating
 from flask_login import login_required, current_user
@@ -97,7 +97,9 @@ def movie_rating(id):
             title=form.title.data,
             content=form.content.data
         ).save()
-
-        flash('rating recorded')
+        recommender.add_ratings([[
+            int(form.uid.data), int(form.mid.data), float(form.rating.data)
+        ]])
+        flash('rating recorded, retraining model...')
         return redirect(url_for('main.movie_rating', id=id))
     return render_template('rating.html', movie=movie, form=form)

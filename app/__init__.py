@@ -48,7 +48,7 @@ def create_app(conf=None):
     lm.init_app(app)
     mail.init_app(app)
     mg.init_app(app, config_prefix='MONGO1')
-    recommender.init_app(app)
+    recommender.init_app(mg)
 
     from main import main as main_bp
     app.register_blueprint(main_bp)
