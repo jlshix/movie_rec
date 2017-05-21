@@ -109,6 +109,22 @@ class Recommender(object):
             .join(self.id_count_rdd).map(lambda x: (x[1][0][1], x[1][0][0], x[1][1]))
         return title_rating_count
 
+    def __predict_more(self, user_movie_rdd):
+        """
+        对给定的 (userId, movieId) 进行预测
+        :param user_movie_rdd:
+        :return: (mid, title, rating, count)
+        """
+        # (mid, rating).(mid, title) -> (mid, (rating, title))
+        # (mid, (rating, title)).(mid, count) -> (mid, ((rating, title), count))
+        predicted_movie_rating = self.model.predictAll(user_movie_rdd)\
+            .map(lambda x: (x.product, x.rating))
+        mid_title_rating_count = predicted_movie_rating.join(self.titles_rdd)\
+            .join(self.id_count_rdd).map(lambda x: (x[0], x[1][0][1], x[1][0][0], x[1][1]))
+        return mid_title_rating_count
+
+
+
     def add_ratings(self, ratings):
         """
         增加新的评分数据
@@ -140,7 +156,7 @@ class Recommender(object):
         uid_movie_rdd = self.ratings_rdd.filter(lambda x: x[0] != uid)\
             .map(lambda x: (uid, x[1])).distinct()
 
-        top_n = self.__predict(uid_movie_rdd)\
-            .filter(lambda r: r[2] >= 25).takeOrdered(n, key=lambda x: -x[1])
+        top_n = self.__predict_more(uid_movie_rdd)\
+            .filter(lambda r: r[3] >= 25).takeOrdered(n, key=lambda x: -x[2])
         log.info('done top_n...')
         return top_n

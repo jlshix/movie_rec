@@ -34,8 +34,7 @@ def user(id):
     wts = Wt.objects(user=user).order_by('type')
     likes = Like.objects(user=user)
     ratings = Rating.objects(uid=user.uid)
-    movies = recommender.top_n(user.uid, 8)
-    return render_template('user.html', user=user, wts=wts, likes=likes, ratings=ratings, movies=movies)
+    return render_template('user.html', user=user, wts=wts, likes=likes, ratings=ratings)
 
 
 @main.route('/search/', methods=['GET', 'POST'])

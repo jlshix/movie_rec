@@ -20,8 +20,14 @@ def cf_by_user():
     uid = request.args.get('uid') or "1"
     n = int(request.args.get('n') or 8)
 
+    contents = []
     recs = recommender.top_n(uid, n)
-    contents = [{"title": rec[0], "rating": rec[1], "count": rec[2]} for rec in recs]
+    for rec in recs:
+        tmp = dict(zip(('mid', 'title', 'rating', 'count'), rec))
+        poster = mg.db.movie.find_one({'lens_id': rec[0]})['poster']
+        tmp['poster'] = poster
+        contents.append(tmp)
+
     return json.dumps({
         'status': 200,
         'contents': contents

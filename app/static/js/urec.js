@@ -9,9 +9,10 @@ function display_in_div(div, contents) {
             inner += '<div class="row">'
         }
         inner += `<div class="col-sm-4 col-md-3 center">
-                    <!--<img src="` + contents[i].poster + `" class="img-rounded" width="120px">-->
+                    <img src="` + contents[i].poster + `" class="img-rounded" width="120px">
                     <h5 class="text-primary">` + contents[i].title + `</h5>
-                    <h5 class="text-primary">` + contents[i].rating + `</h5>
+                    <h5 class="text-danger">` + contents[i].rating + `</h5>
+                    <h5 class="text-warning">` + contents[i].mid + `</h5>
                 </div>`;
         if (i % 4 == 3) {
             inner += '</div><br/>'
