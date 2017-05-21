@@ -36,7 +36,12 @@ User - {{ user.name }}
         </tr>
         <tr>
             <td>Ratings:</td>
-            <td>{{ ratings }}</td>
+            <td>
+                {% for rating in ratings %}
+                    <span class="text-info">{{ rating.name }}  </span>
+                    <span class="text-danger">{{ rating.uid }}  {{ rating.mid }}  {{ rating.rating }} </span>@ {{ rating.dt }}<br/>
+                {% endfor %}
+            </td>
         </tr>
         <tr>
             <td>Watch:</td>

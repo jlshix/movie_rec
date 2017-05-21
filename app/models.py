@@ -4,7 +4,7 @@
 数据库模型
 """
 from . import db, lm
-from mongoengine import (StringField, IntField, BooleanField, DateTimeField,
+from mongoengine import (StringField, IntField, BooleanField, DateTimeField, FloatField,
                          SequenceField, ListField, ReferenceField)
 from bson import ObjectId
 from flask_login import UserMixin
@@ -110,11 +110,12 @@ class Like(db.Document):
 class Rating(db.Document):
     """
     评论
-    包括电影id 标题 内容
+    包括 用户ID 评分 电影ID 标题 内容 时间戳
     """
-    user = ReferenceField(User)
-    rating = IntField(min_value=0, max_value=10)
-    mid = StringField(max_length=16)
+    uid = IntField()
+    mid = IntField()
+    name = StringField()
+    rating = FloatField(min_value=0, max_value=5)
     title = StringField(max_length=64)
     content = StringField()
     dt = DateTimeField(default=datetime.utcnow())

@@ -26,13 +26,14 @@ def index():
 def user(id):
     """
     用户页面 待完善
-    :param name:
+    :param id:
     :return:
     """
     user = User.objects(id=id).first()
     wts = Wt.objects(user=user).order_by('type')
     likes = Like.objects(user=user)
-    return render_template('user.html', user=user, wts=wts, likes=likes)
+    ratings = Rating.objects(uid=user.uid)
+    return render_template('user.html', user=user, wts=wts, likes=likes, ratings=ratings)
 
 
 @main.route('/search/', methods=['GET', 'POST'])
@@ -86,11 +87,13 @@ def movie_rating(id):
     movie = mg.db.movie.find_one({'_id': id})
     form.uid.data = current_user.uid
     form.mid.data = movie['lens_id']
+    form.name.data = movie['title']
     if form.validate_on_submit() and request.method == 'POST':
         Rating(
             uid=int(form.uid.data),
-            rating=float(form.rating.data),
             mid=int(form.mid.data),
+            name=form.name.data,
+            rating=float(form.rating.data),
             title=form.title.data,
             content=form.content.data
         ).save()
