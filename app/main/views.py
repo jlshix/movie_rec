@@ -10,6 +10,7 @@ from app import mg, db, recommender
 from utils import add_douban_movie, paginate
 from app.models import User, Wt, Like, Rating
 from flask_login import login_required, current_user
+from utils import rec_sum
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -33,7 +34,8 @@ def user(id):
     wts = Wt.objects(user=user).order_by('type')
     likes = Like.objects(user=user)
     ratings = Rating.objects(uid=user.uid)
-    return render_template('user.html', user=user, wts=wts, likes=likes, ratings=ratings)
+    movies = recommender.top_n(user.uid, 8)
+    return render_template('user.html', user=user, wts=wts, likes=likes, ratings=ratings, movies=movies)
 
 
 @main.route('/search/', methods=['GET', 'POST'])
@@ -76,8 +78,8 @@ def add_new_movie():
 
 @main.route('/subject/<id>', methods=['GET', 'POST'])
 def movie_subject(id):
-    movie = mg.db.movie.find({'_id': id}).limit(1)
-    return render_template('movie.html', movie=movie[0])
+    movie = mg.db.movie.find_one({'_id': id})
+    return render_template('movie.html', movie=movie)
 
 
 @main.route('/subject/<id>/rating', methods=['GET', 'POST'])

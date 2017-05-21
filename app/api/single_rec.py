@@ -3,6 +3,7 @@
 """
 针对单部电影的推荐 API
 """
+from flask import request
 import json
 from operator import add
 from utils import res_return, RES_FILTER, LIMIT
@@ -79,8 +80,11 @@ def rec_by_casts(id):
         })
 
 
-@api.route('/rec/sum/<id>')
-def rec_sum(id):
+@api.route('/rec/sum/')
+def rec_sum():
+    id = request.args.get('id')
+    limit = int(request.args.get('limit') or 8)
+    skip = int(request.args.get('skip') or 0)
     item = mg.db.movie.find_one({'_id': id})
     genres_cursor = mg.db.movie.find({
         'genres': item['genres']
@@ -126,8 +130,8 @@ def rec_sum(id):
     else:
         return json.dumps({
             'status': 200,
-            'count': len(res),
-            'contents': res
+            'count': min(len(res), limit),
+            'contents': res[skip:limit]
         })
 
 

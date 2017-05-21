@@ -7,6 +7,16 @@ import requests
 from bs4 import BeautifulSoup
 from flask import abort
 from math import ceil
+import json
+from app import recommender, mg
+from operator import add
+
+RES_FILTER = {
+        'id': 1,
+        'title': 1,
+        'rating.average': 1
+    }
+LIMIT = 20
 
 
 def add_douban_movie(id):
@@ -262,3 +272,54 @@ class Pagination(object):
                     yield None
                 yield num
                 last = num
+
+
+def rec_sum(id):
+    item = mg.db.movie.find_one({'_id': id})
+    genres_cursor = mg.db.movie.find({
+        'genres': item['genres']
+    }, RES_FILTER).limit(LIMIT)
+    directors_cursor = mg.db.movie.find({
+        'directors': item['directors']
+    }, RES_FILTER).limit(LIMIT)
+    writers_cursor = mg.db.movie.find({
+        'writers': item['writers']
+    }, RES_FILTER).limit(LIMIT)
+
+    contents = []
+    for i in xrange(2):
+        cursor = mg.db.movie.find({'casts': {
+            '$elemMatch': {
+                'id': item['casts'][i]['id']
+            }
+        }}, RES_FILTER).limit(LIMIT)
+        contents.extend(list(cursor))
+
+    contents.extend(list(genres_cursor))
+    contents.extend(list(directors_cursor))
+    contents.extend(list(writers_cursor))
+
+    rdd = recommender.sc.parallelize([x['_id'] for x in contents])
+    tmp = rdd.map(lambda x: (x, 1))\
+        .reduceByKey(add)\
+        .sortBy(lambda x: x[1], False)\
+        .map(lambda x: x[0])\
+        .toLocalIterator()
+    res = []
+    tlist = []
+    for c in contents:
+        if c not in tlist:
+            tlist.append(c)
+    for t in tmp:
+        for c in tlist:
+            if c['_id'] == t:
+                res.append(c)
+
+    if len(res) == 0:
+        return json.dumps({'status': 404})
+    else:
+        return json.dumps({
+            'status': 200,
+            'count': len(res),
+            'contents': res
+        })

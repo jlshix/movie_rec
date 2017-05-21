@@ -4,6 +4,12 @@
 User - {{ user.name }}
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/urec.js') }}"></script>
+{% endblock %}
+
+
 {% block page_content %}
     <div class="page-header">
         <h1>{{ user.name }}</h1>
@@ -52,4 +58,19 @@ User - {{ user.name }}
             </td>
         </tr>
     </table>
+
+    <span id="hidden_uid">{{ current_user.uid }}</span>
+
+    <div id="rec" class="container">
+        <h1 class="text-primary page-header">相似电影</h1>
+        {% for movie in movies %}
+                {% if  loop.index0%4==0 %}<div class="row">{% endif %}
+                <div class="col-sm-4 col-md-3 center">
+                    <img src="{{ movie.poster }}" class="img-rounded" width="120px">
+                    <h5 class="text-primary">{{ movie.title }}</h5>
+                    <h5 class="text-primary">{{ movie._id }}</h5>
+                </div>
+                {% if  loop.index0%4==3 %}</div><br/>{% endif %}
+        {% endfor %}
+    </div>
 {% endblock %}

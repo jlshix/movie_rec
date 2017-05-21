@@ -3,9 +3,11 @@
 import json
 
 RES_FILTER = {
-        'id': 1,
+        '_id': 1,
         'title': 1,
-        'rating.average': 1
+        'rating.average': 1,
+        'poster': 1,
+        'lens_id': 1
     }
 LIMIT = 20
 
