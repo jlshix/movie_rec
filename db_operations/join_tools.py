@@ -49,7 +49,7 @@ def to_mongo(old, new, res):
     ids = res.map(lambda x: x[1]).toLocalIterator()
     for lens_id, douban in ids:
         doc = old.find_one({'_id': douban})
-        doc['lens_id'] = lens_id
+        doc['lens_id'] = int(lens_id)
         new.insert_one(doc)
 
 

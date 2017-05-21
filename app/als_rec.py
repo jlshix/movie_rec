@@ -43,7 +43,7 @@ class Recommender(object):
         # 载入 movielens 数据
         log.info('loading ratings data...')
         # ratings_raw = sc.textFile(path_to_file + 'ratings/*')
-        ratings_raw = self.sc.textFile('ratings.csv')
+        ratings_raw = self.sc.textFile('./db_operations/ratings.csv')
         log.info(ratings_raw.take(6))
         # take 返回一个列表 用[0]还是取第一个
         ratings_raw_header = ratings_raw.take(1)[0]
@@ -56,7 +56,7 @@ class Recommender(object):
         log.info('ratings data done...')
 
         # movies_raw = sc.textFile(path_to_file + 'movies/*')
-        movies_raw = self.sc.textFile('movies.csv')
+        movies_raw = self.sc.textFile('./db_operations/movies.csv')
         movies_raw_header = movies_raw.take(1)[0]
         # movies 结构为 (movieId, title, genres)
         self.movies_rdd = movies_raw.filter(lambda line: line != movies_raw_header) \
