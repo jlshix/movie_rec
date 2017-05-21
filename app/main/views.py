@@ -5,11 +5,11 @@ main 蓝本的视图
 """
 from . import main
 from flask import render_template, flash, request, session, redirect, url_for
-from forms import SearchForm, AddNewMovieForm
-from app import mg
+from forms import SearchForm, AddNewMovieForm, RatingForm
+from app import mg, db
 from utils import add_douban_movie, paginate
 from app.models import User, Wt, Like, Rating
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -73,7 +73,28 @@ def add_new_movie():
     return render_template('add-new-movie.html', form=form)
 
 
-@main.route('/subject/<id>')
+@main.route('/subject/<id>', methods=['GET', 'POST'])
 def movie_subject(id):
     movie = mg.db.movie.find({'_id': id}).limit(1)
     return render_template('movie.html', movie=movie[0])
+
+
+@main.route('/subject/<id>/rating', methods=['GET', 'POST'])
+@login_required
+def movie_rating(id):
+    form = RatingForm()
+    movie = mg.db.movie.find_one({'_id': id})
+    form.uid.data = current_user.uid
+    form.mid.data = movie['lens_id']
+    if form.validate_on_submit() and request.method == 'POST':
+        Rating(
+            uid=int(form.uid.data),
+            rating=float(form.rating.data),
+            mid=int(form.mid.data),
+            title=form.title.data,
+            content=form.content.data
+        ).save()
+
+        flash('rating recorded')
+        return redirect(url_for('main.movie_rating', id=id))
+    return render_template('rating.html', movie=movie, form=form)

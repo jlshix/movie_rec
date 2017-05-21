@@ -38,7 +38,10 @@ Movie - {{ movie.title }}
     <table class="table table-responsive input-lg">
         <tr>
             <td>rating:</td>
-            <td>{{ utils.star(movie.rating) }}</td>
+            <td>
+                {{ utils.star(movie.rating) }}
+                <a href="{{ url_for('main.movie_rating', id=movie._id) }}" class="btn btn-info" role="button">我要评分</a>
+            </td>
         </tr>
         <tr>
             <td>directors:</td>

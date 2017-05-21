@@ -5,7 +5,7 @@
 """
 
 from flask_wtf import FlaskForm as Form
-from wtforms import IntegerField, StringField, SubmitField
+from wtforms import IntegerField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Length, AnyOf
 
 
@@ -23,3 +23,15 @@ class AddNewMovieForm(Form):
     """
     id = StringField('Id', validators=[DataRequired(), Length(min=5)])
     submit = SubmitField('Add')
+
+
+class RatingForm(Form):
+    """
+    评分
+    """
+    uid = IntegerField('Uid', validators=[DataRequired()])
+    rating = IntegerField('Rating', validators=[DataRequired()])
+    mid = IntegerField('Mid', validators=[DataRequired()])
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Submit')
