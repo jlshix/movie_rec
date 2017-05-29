@@ -5,10 +5,11 @@
 """
 from flask import request
 import json
-from operator import add
-from utils import res_return, RES_FILTER, LIMIT
+from utils import res_return, RES_FILTER, LIMIT, CONTENTS_FILTER
 from . import api
-from app import mg, recommender
+from app import mg
+import numpy as np
+import pandas as pd
 
 
 @api.route('/rec/tags/<id>', methods=['GET', 'POST'])
@@ -83,47 +84,55 @@ def rec_by_casts(id):
 @api.route('/rec/sum/')
 def rec_sum():
     id = request.args.get('id')
-    limit = int(request.args.get('limit') or 8)
-    skip = int(request.args.get('skip') or 0)
+    limit = int(request.args.get('limit') or 16)
+    skip = int(request.args.get('skip') or 1)
     item = mg.db.movie.find_one({'_id': id})
+
+    # 使用 pandas 的 DataFrame 处理数据
+    # lens_id, genres, directors, writers, casts, sum
+    # groupBy and sort_values
     genres_cursor = mg.db.movie.find({
         'genres': item['genres']
     }, RES_FILTER).limit(LIMIT)
+    genres = map(lambda x: [x['lens_id'], 1, 0, 0, 0], genres_cursor)
+
     directors_cursor = mg.db.movie.find({
-        'directors': item['directors']
+        'directors': {"$in": item['directors']}
     }, RES_FILTER).limit(LIMIT)
+    directors = map(lambda x: [x['lens_id'], 0, 1, 0, 0], directors_cursor)
+
     writers_cursor = mg.db.movie.find({
-        'writers': item['writers']
+        'writers': {"$in": item['writers']}
     }, RES_FILTER).limit(LIMIT)
+    writers = map(lambda x: [x['lens_id'], 0, 0, 1, 0], writers_cursor)
 
     contents = []
-    for i in xrange(2):
+    casts_len = len(item['casts'])
+    casts_iter = min(casts_len, 5)
+    for i in xrange(casts_iter):
         cursor = mg.db.movie.find({'casts': {
             '$elemMatch': {
                 'id': item['casts'][i]['id']
             }
         }}, RES_FILTER).limit(LIMIT)
-        contents.extend(list(cursor))
+        contents.extend(map(lambda x: [x['lens_id'], 0, 0, 0, 2], cursor))
 
-    contents.extend(list(genres_cursor))
-    contents.extend(list(directors_cursor))
-    contents.extend(list(writers_cursor))
+    contents.extend(genres)
+    contents.extend(directors)
+    contents.extend(writers)
 
-    rdd = recommender.sc.parallelize([x['_id'] for x in contents])
-    tmp = rdd.map(lambda x: (x, 1))\
-        .reduceByKey(add)\
-        .sortBy(lambda x: x[1], False)\
-        .map(lambda x: x[0])\
-        .toLocalIterator()
+    data = np.array(contents)
+    df = pd.DataFrame(data, columns=['lens_id', 'genres', 'directors', 'writers', 'casts'])
+    group = df.groupby('lens_id').sum()
+    group['sum'] = group.genres + group.directors + group.writers + group.casts
+    movies = group.sort_values(by='sum', ascending=False)
+    ids = movies.index.tolist()
+
     res = []
-    tlist = []
-    for c in contents:
-        if c not in tlist:
-            tlist.append(c)
-    for t in tmp:
-        for c in tlist:
-            if c['_id'] == t:
-                res.append(c)
+    for mv in ids:
+        tmp = mg.db.movie.find_one({'lens_id': mv}, CONTENTS_FILTER)
+        tmp['rank'] = movies.loc[mv].tolist().__str__()
+        res.append(tmp)
 
     if len(res) == 0:
         return json.dumps({'status': 404})
@@ -133,5 +142,3 @@ def rec_sum():
             'count': min(len(res), limit),
             'contents': res[skip:limit]
         })
-
-
