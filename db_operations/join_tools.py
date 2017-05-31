@@ -64,7 +64,7 @@ def to_movie(sc, size, movie_ids):
         .flatMap(lambda x: x.split('\n')) \
         .map(lambda x: x.split(',')) \
         .filter(lambda x: x[0] in movie_ids)\
-        .map(lambda x: u'{},{},{}'.format(x[0], x[1], x[2]))\
+        .map(lambda x: ','.join(x))\
         .saveAsTextFile('movies')
 
 
@@ -86,7 +86,7 @@ def to_rating(sc, size, movie_ids):
 if __name__ == '__main__':
     client = MongoClient('localhost', 27017)
     col = client['movie']['spider']
-    new = client['mr']['movie']
+    # new = client['mr']['movie']
     conf = SparkConf().setAppName('Join IMDB').setMaster('local[*]')
     sc = SparkContext(conf=conf)
 
@@ -98,9 +98,9 @@ if __name__ == '__main__':
     res = imdb_id.join(imdb_douban)
     print res.count()
 
-    to_mongo(col, new, res)
+    # to_mongo(col, new, res)
 
-    # movie_ids = res.map(lambda x: x[1][0])
-    # to_movie(sc, 'full', list(movie_ids.toLocalIterator()))
+    movie_ids = res.map(lambda x: x[1][0])
+    to_movie(sc, 'full', list(movie_ids.toLocalIterator()))
     # to_rating(sc, 'full', list(movie_ids.toLocalIterator()))
 

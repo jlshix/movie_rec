@@ -44,7 +44,7 @@ User - {{ user.name }}
             <td>Ratings:</td>
             <td>
                 {% for rating in ratings %}
-                    <span class="text-info">{{ rating.name }}  </span>
+                    <a href="{{ url_for('main.lens2mid', id=rating.mid) }}" class="text-info">{{ rating.name }}  </a>
                     <span class="text-danger">{{ rating.uid }}  {{ rating.mid }}  {{ rating.rating }} </span>@ {{ rating.dt }}<br/>
                 {% endfor %}
             </td>

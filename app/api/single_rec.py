@@ -92,14 +92,14 @@ def rec_sum():
     # lens_id, genres, directors, writers, casts, sum
     # groupBy and sort_values
     genres_cursor = mg.db.movie.find({
-        'genres': item['genres']
-    }, RES_FILTER).limit(LIMIT)
+        'genres': {"$in": item['genres']}
+    }, RES_FILTER).limit(LIMIT * 3)
     genres = map(lambda x: [x['lens_id'], 1, 0, 0, 0], genres_cursor)
 
     directors_cursor = mg.db.movie.find({
         'directors': {"$in": item['directors']}
     }, RES_FILTER).limit(LIMIT)
-    directors = map(lambda x: [x['lens_id'], 0, 1, 0, 0], directors_cursor)
+    directors = map(lambda x: [x['lens_id'], 0, 2, 0, 0], directors_cursor)
 
     writers_cursor = mg.db.movie.find({
         'writers': {"$in": item['writers']}

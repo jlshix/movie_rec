@@ -104,3 +104,9 @@ def movie_rating(id):
         flash('rating recorded, retraining model...')
         return redirect(url_for('main.movie_rating', id=id))
     return render_template('rating.html', movie=movie, form=form)
+
+
+@main.route('/lens2mid/<id>', methods=['GET', 'POST'])
+def lens2mid(id):
+    movie = mg.db.movie.find_one({'lens_id': int(id)})
+    return redirect(url_for('main.movie_subject', id=movie['_id']))
