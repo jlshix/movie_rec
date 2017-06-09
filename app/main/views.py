@@ -16,8 +16,8 @@ from utils import rec_sum
 @main.route('/', methods=['GET', 'POST'])
 def index():
     """
-    主页 待完善
-    :return: render
+    主页 跳转至搜索
+    :return: redirect
     """
     return redirect(url_for('.search'))
 

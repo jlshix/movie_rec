@@ -90,7 +90,7 @@ if __name__ == '__main__':
     conf = SparkConf().setAppName('Join IMDB').setMaster('local[*]')
     sc = SparkContext(conf=conf)
 
-    imdb_id = get_imdb_id(sc, 'full')
+    imdb_id = get_imdb_id(sc, 'small')
     print imdb_id.count(), imdb_id.take(5)
     imdb_douban = get_imdb_douban(col, sc)
     print imdb_douban.count(), imdb_douban.take(5)
@@ -101,6 +101,6 @@ if __name__ == '__main__':
     # to_mongo(col, new, res)
 
     movie_ids = res.map(lambda x: x[1][0])
-    to_movie(sc, 'full', list(movie_ids.toLocalIterator()))
-    # to_rating(sc, 'full', list(movie_ids.toLocalIterator()))
+    to_movie(sc, 'small', list(movie_ids.toLocalIterator()))
+    to_rating(sc, 'small', list(movie_ids.toLocalIterator()))
 
